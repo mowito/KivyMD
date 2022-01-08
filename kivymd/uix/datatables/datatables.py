@@ -472,6 +472,11 @@ class TableData(RecycleView):
     and defaults to `{}`.
     """
 
+    row_color = []
+    """
+    List of colors for every row in table
+    """
+
     cell_row_obj_dict = {}
 
     _parent = ObjectProperty()
@@ -521,6 +526,11 @@ class TableData(RecycleView):
                 high += self.total_col_headings
 
             for j, x in enumerate(data):
+                print(self.rows_num)
+                if self.row_color:
+                    cell_color = self.row_color[int(j/8)] #self.rows_num)]
+                else:
+                    cell_color = self._parent.background_color_cell
                 if x[0] == x[1]:
                     self.data_first_cells.append(x[2][0])
                     self.recycle_data.append(
@@ -531,7 +541,7 @@ class TableData(RecycleView):
                             "selectable": True,
                             "viewclass": "CellRow",
                             "table": self,
-                            "background_color_cell": self._parent.background_color_cell,
+                            "background_color_cell": cell_color,
                             "background_color_selected_cell": self._parent.background_color_selected_cell,
                         }
                     )
@@ -542,7 +552,7 @@ class TableData(RecycleView):
                         "selectable": True,
                         "viewclass": "CellRow",
                         "table": self,
-                        "background_color_cell": self._parent.background_color_cell,
+                        "background_color_cell": cell_color,
                         "background_color_selected_cell": self._parent.background_color_selected_cell,
                     }
 
@@ -1429,6 +1439,8 @@ class MDDataTable(ThemableBehavior, AnchorLayout):
     and defaults to :class:`~kivymd.effects.stiffscroll.StiffScrollEffect`.
     """
 
+    row_color = []
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.header = TableHeader(
@@ -1460,7 +1472,7 @@ class MDDataTable(ThemableBehavior, AnchorLayout):
         Clock.schedule_interval(lambda dt: self.update_header_scroll_x(), 0.01) # update scroll bar of header
         self.bind(row_data=self.update_row_data)
 
-    def update_row_data(self, instance_data_table, data: list) -> NoReturn:
+    def update_row_data(self, instance_data_table, data: list, row_color) -> NoReturn:
         """
         Called when a the widget data must be updated.
 
@@ -1470,6 +1482,7 @@ class MDDataTable(ThemableBehavior, AnchorLayout):
         """
 
         self.table_data.row_data = data
+        self.table_data.row_color = row_color
         self.table_data.on_rows_num(self, self.table_data.rows_num)
         # Set cursors to 0.
         self.table_data._rows_number = 0
