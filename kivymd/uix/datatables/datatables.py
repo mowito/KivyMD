@@ -526,9 +526,8 @@ class TableData(RecycleView):
                 high += self.total_col_headings
 
             for j, x in enumerate(data):
-                print(self.rows_num)
                 if self.row_color:
-                    cell_color = self.row_color[int(j/8)] #self.rows_num)]
+                    cell_color = self.row_color[int(j/len(self.table_header.column_data))] #self.rows_num)]
                 else:
                     cell_color = self._parent.background_color_cell
                 if x[0] == x[1]:
