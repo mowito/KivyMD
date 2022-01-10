@@ -214,11 +214,11 @@ class MDTooltip(ThemableBehavior, HoverBehavior, TouchBehavior):
         self._tooltip.pos = (x, y)
 
         if DEVICE_TYPE == "desktop":
-            Clock.schedule_once(
-                self.animation_tooltip_show, self.tooltip_display_delay
-            )
+            #Clock.schedule_once(self.animation_tooltip_show, self.tooltip_display_delay)
+            pass
         else:
-            Clock.schedule_once(self.animation_tooltip_show, 0)
+            #Clock.schedule_once(self.animation_tooltip_show, 0)
+            pass
 
     def animation_tooltip_show(self, interval: Union[int, float]) -> NoReturn:
         """Animation of opening tooltip on the screen."""
