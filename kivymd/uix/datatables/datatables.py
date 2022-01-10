@@ -66,6 +66,7 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.scrollview import ScrollView
+from kivy.utils import get_color_from_hex
 
 from kivymd import uix_path
 from kivymd.effects.stiffscroll import StiffScrollEffect
@@ -1456,6 +1457,8 @@ class MDDataTable(ThemableBehavior, AnchorLayout):
             _parent=self,
         )
         self.table_data.bar_width = 3
+        self.table_data.bar_inactive_color = get_color_from_hex("#00000085")#([0.7, 0.7, 0.7])
+        self.table_data.bar_color = get_color_from_hex("#000000b3")
         self.table_data.scroll_type = ['bars', 'content']
         self.register_event_type("on_row_press")
         self.register_event_type("on_check_press")
