@@ -66,6 +66,7 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.scrollview import ScrollView
+from kivy.utils import get_color_from_hex
 
 from kivymd import uix_path
 from kivymd.effects.stiffscroll import StiffScrollEffect
@@ -472,6 +473,11 @@ class TableData(RecycleView):
     and defaults to `{}`.
     """
 
+    row_color = []
+    """
+    List of colors for every row in table
+    """
+
     cell_row_obj_dict = {}
 
     _parent = ObjectProperty()
@@ -488,7 +494,7 @@ class TableData(RecycleView):
         self.cols_minimum = table_header.cols_minimum
         self.set_row_data()
         self.effect_cls = self._parent.effect_cls
-        Clock.schedule_once(self.set_default_first_row, 0)
+        #Clock.schedule_once(self.set_default_first_row, 0)
 
     def get_select_row(self, index: int) -> NoReturn:
         """Returns the current row with all elements."""
@@ -521,6 +527,10 @@ class TableData(RecycleView):
                 high += self.total_col_headings
 
             for j, x in enumerate(data):
+                if self.row_color:
+                    cell_color = self.row_color[int(j/len(self.table_header.column_data))] #self.rows_num)]
+                else:
+                    cell_color = self._parent.background_color_cell
                 if x[0] == x[1]:
                     self.data_first_cells.append(x[2][0])
                     self.recycle_data.append(
@@ -531,7 +541,7 @@ class TableData(RecycleView):
                             "selectable": True,
                             "viewclass": "CellRow",
                             "table": self,
-                            "background_color_cell": self._parent.background_color_cell,
+                            "background_color_cell": cell_color,
                             "background_color_selected_cell": self._parent.background_color_selected_cell,
                         }
                     )
@@ -542,7 +552,7 @@ class TableData(RecycleView):
                         "selectable": True,
                         "viewclass": "CellRow",
                         "table": self,
-                        "background_color_cell": self._parent.background_color_cell,
+                        "background_color_cell": cell_color,
                         "background_color_selected_cell": self._parent.background_color_selected_cell,
                     }
 
@@ -1429,6 +1439,8 @@ class MDDataTable(ThemableBehavior, AnchorLayout):
     and defaults to :class:`~kivymd.effects.stiffscroll.StiffScrollEffect`.
     """
 
+    row_color = []
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.header = TableHeader(
@@ -1444,20 +1456,25 @@ class MDDataTable(ThemableBehavior, AnchorLayout):
             rows_num=self.rows_num,
             _parent=self,
         )
+        self.table_data.bar_width = 3
+        self.table_data.bar_inactive_color = get_color_from_hex("#00000085")#([0.7, 0.7, 0.7])
+        self.table_data.bar_color = get_color_from_hex("#000000b3")
+        self.table_data.scroll_type = ['bars', 'content']
         self.register_event_type("on_row_press")
         self.register_event_type("on_check_press")
         self.pagination = TablePagination(table_data=self.table_data)
         self.table_data.pagination = self.pagination
         self.header.table_data = self.table_data
-        self.table_data.fbind("scroll_x", self._scroll_with_header)
+        #self.table_data.fbind("scroll_x", self._scroll_with_header)
         self.ids.container.add_widget(self.header)
         self.ids.container.add_widget(self.table_data)
         if self.use_pagination:
             self.ids.container.add_widget(self.pagination)
         Clock.schedule_once(self.create_pagination_menu, 0.5)
+        Clock.schedule_interval(lambda dt: self.update_header_scroll_x(), 0.01) # update scroll bar of header
         self.bind(row_data=self.update_row_data)
 
-    def update_row_data(self, instance_data_table, data: list) -> NoReturn:
+    def update_row_data(self, instance_data_table, data: list, row_color) -> NoReturn:
         """
         Called when a the widget data must be updated.
 
@@ -1467,6 +1484,7 @@ class MDDataTable(ThemableBehavior, AnchorLayout):
         """
 
         self.table_data.row_data = data
+        self.table_data.row_color = row_color
         self.table_data.on_rows_num(self, self.table_data.rows_num)
         # Set cursors to 0.
         self.table_data._rows_number = 0
@@ -1482,6 +1500,9 @@ class MDDataTable(ThemableBehavior, AnchorLayout):
         self.table_data.set_next_row_data_parts("")
         self.pagination.ids.button_back.disabled = True
         Clock.schedule_once(self.create_pagination_menu, 0.5)
+
+    def update_header_scroll_x(self):
+        self.header.scroll_x = self.table_data.scroll_x
 
     def add_row(self, data: Union[list, tuple]) -> NoReturn:
         """
